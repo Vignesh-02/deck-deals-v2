@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import User from "@/models/User";
 
 export function buildEmailVerificationToken() {
   const token = crypto.randomBytes(32).toString("hex");
@@ -9,16 +10,26 @@ export function buildEmailVerificationToken() {
 }
 
 export async function issueEmailVerification(user: {
+  _id: string;
   username: string;
-  email: string;
+  email?: string;
   emailVerificationTokenHash?: string;
   emailVerificationExpiresAt?: Date;
-  save: () => Promise<unknown>;
 }) {
+  if (!user.email) {
+    throw new Error("This account has no email address. Please update email first.");
+  }
+
   const { token, tokenHash, expiresAt } = buildEmailVerificationToken();
-  user.emailVerificationTokenHash = tokenHash;
-  user.emailVerificationExpiresAt = expiresAt;
-  await user.save();
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        emailVerificationTokenHash: tokenHash,
+        emailVerificationExpiresAt: expiresAt,
+      },
+    }
+  );
 
   await sendVerificationEmail({
     to: user.email,

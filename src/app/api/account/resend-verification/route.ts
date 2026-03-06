@@ -25,6 +25,12 @@ export async function POST() {
         { status: 200 }
       );
     }
+    if (!user.email) {
+      return NextResponse.json(
+        { error: "Your account has no email. Please update your email first." },
+        { status: 400 }
+      );
+    }
 
     await issueEmailVerification(user as any);
 

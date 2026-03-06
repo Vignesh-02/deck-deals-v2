@@ -49,7 +49,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if ((token as any).role !== "seller") {
+  const role = (token as any).role as string | undefined;
+
+  // Legacy/stale tokens may not have role yet. Let downstream server checks
+  // (which can hydrate role from DB) make the final authorization decision.
+  if (!role) {
+    return NextResponse.next();
+  }
+
+  if (role !== "seller") {
     if (protectsApi) {
       return NextResponse.json(
         { error: "Only sellers can access this resource." },

@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       $or: [{ username: identifier }, { email: normalized }],
     });
 
-    if (!user || user.emailVerified) {
+    if (!user || user.emailVerified || !user.email) {
       return NextResponse.json({ message: genericMessage });
     }
 

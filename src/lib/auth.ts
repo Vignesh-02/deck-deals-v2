@@ -47,6 +47,15 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = (user as any).role;
         token.email = user.email;
+      } else if (token.id && !token.role) {
+        // Backfill role/email for older JWT cookies that were issued before
+        // role/email claims were added.
+        await dbConnect();
+        const dbUser = await User.findById(token.id).select("role email").lean();
+        if (dbUser) {
+          token.role = (dbUser as any).role;
+          token.email = (dbUser as any).email;
+        }
       }
       return token;
     },

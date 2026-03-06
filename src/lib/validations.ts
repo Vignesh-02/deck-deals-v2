@@ -8,9 +8,19 @@ const imageUrlSchema = z.string().refine((value) => {
 }, "Each image must be a valid URL.");
 
 export const registerSchema = z.object({
-  username: z.string().min(5, "Username must be at least 5 characters long."),
+  username: z
+    .string()
+    .min(5, "Username must be at least 5 characters long.")
+    .regex(/^[A-Za-z0-9]+$/, "Username can only contain letters and numbers."),
   email: z.string().email("Please enter a valid email."),
-  password: z.string().min(8, "Password must be at least 8 characters long."),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long.")
+    .regex(/[A-Z]/, "Password must include at least one uppercase letter.")
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must include at least one special character."
+    ),
   role: z.enum(["seller", "customer"], { message: "Please choose a role." }),
 });
 

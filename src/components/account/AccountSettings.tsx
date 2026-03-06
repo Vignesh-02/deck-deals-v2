@@ -65,15 +65,22 @@ export default function AccountSettings() {
         return;
       }
 
+      if (data.sameEmail) {
+        addToast(data.message || "Same email address.", "error");
+        setEmail((prev) => prev.replace(/\s+/g, "").trim().toLowerCase());
+        return;
+      }
+
       setProfile((prev) =>
         prev
           ? {
               ...prev,
-              email,
+              email: (data.updatedEmail || email).toLowerCase(),
               emailVerified: false,
             }
           : prev
       );
+      setEmail((data.updatedEmail || email).toLowerCase());
       addToast(data.message || "Email updated.", "success");
     } catch {
       addToast("Could not update email.", "error");
@@ -189,14 +196,16 @@ export default function AccountSettings() {
             <Button type="submit" disabled={emailLoading}>
               {emailLoading ? "Saving..." : "Update email"}
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={resending}
-              onClick={handleResendVerification}
-            >
-              {resending ? "Sending..." : "Resend verification"}
-            </Button>
+            {!profile.emailVerified && (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={resending}
+                onClick={handleResendVerification}
+              >
+                {resending ? "Sending..." : "Resend verification"}
+              </Button>
+            )}
           </div>
           <p className="text-xs text-cream-faint">
             Changing your email requires re-verification.

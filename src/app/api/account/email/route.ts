@@ -19,7 +19,11 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const result = updateEmailSchema.safeParse(body);
+    const normalizedInputEmail =
+      typeof body?.email === "string"
+        ? body.email.replace(/\s+/g, "").trim().toLowerCase()
+        : body?.email;
+    const result = updateEmailSchema.safeParse({ email: normalizedInputEmail });
     if (!result.success) {
       return NextResponse.json(
         { error: result.error.issues[0].message },
@@ -34,11 +38,11 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const normalizedEmail = result.data.email.trim().toLowerCase();
+    const normalizedEmail = result.data.email;
 
     if (user.email === normalizedEmail) {
       return NextResponse.json(
-        { message: "Email is already set to this address." },
+        { message: "Same email address.", sameEmail: true },
         { status: 200 }
       );
     }
@@ -58,6 +62,8 @@ export async function PATCH(req: Request) {
     return NextResponse.json({
       message:
         "Email updated. We sent a new verification link to your new email address.",
+      sameEmail: false,
+      updatedEmail: normalizedEmail,
     });
   } catch (err) {
     logger.error({ err }, "Failed to update account email");

@@ -8,6 +8,9 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 
 type UserRole = "seller" | "customer";
+const USERNAME_PATTERN = /^[A-Za-z0-9]+$/;
+const HAS_UPPERCASE = /[A-Z]/;
+const HAS_SPECIAL = /[^A-Za-z0-9]/;
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
@@ -26,11 +29,38 @@ export default function RegisterForm() {
     setError("");
     setSuccess("");
 
+    const trimmedUsername = username.trim();
+    if (trimmedUsername.length < 5) {
+      setError("Username must be at least 5 characters long.");
+      setLoading(false);
+      return;
+    }
+    if (!USERNAME_PATTERN.test(trimmedUsername)) {
+      setError("Username can only contain letters and numbers.");
+      setLoading(false);
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      setLoading(false);
+      return;
+    }
+    if (!HAS_UPPERCASE.test(password)) {
+      setError("Password must include at least one uppercase letter.");
+      setLoading(false);
+      return;
+    }
+    if (!HAS_SPECIAL.test(password)) {
+      setError("Password must include at least one special character.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, role }),
+        body: JSON.stringify({ username: trimmedUsername, email, password, role }),
       });
 
       const data = await res.json();
@@ -104,6 +134,7 @@ export default function RegisterForm() {
         onChange={(e) => setUsername(e.target.value)}
         placeholder="Choose a username"
         minLength={5}
+        pattern="[A-Za-z0-9]+"
         required
       />
       <Input
@@ -124,7 +155,9 @@ export default function RegisterForm() {
           minLength={8}
           required
         />
-        <p className="mt-1 text-xs text-cream-faint">Minimum 8 characters</p>
+        <p className="mt-1 text-xs text-cream-faint">
+          Minimum 8 characters, with 1 uppercase and 1 special character
+        </p>
       </div>
       <Button type="submit" fullWidth disabled={loading}>
         {loading ? "Creating account..." : "Create account"}
