@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { DeckType } from "@/lib/deck-types";
 
 export interface IUser {
   _id: string;
@@ -21,6 +22,7 @@ export interface IDeck {
   name: string;
   mobile: string;
   email: string;
+  deckType?: DeckType;
   address: string;
   price: string;
   images: string[];

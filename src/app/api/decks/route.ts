@@ -54,6 +54,7 @@ export async function POST(req: Request) {
       name: data.name,
       mobile: data.mobile,
       email: data.email,
+      deckType: data.deckType,
       address: data.address,
       price: String(data.price),
       images: data.images,
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
     // persisted using the raw collection API (bypasses schema strict filtering).
     await Deck.collection.updateOne(
       { _id: deck._id },
-      { $set: { images: data.images, image: data.images[0] } }
+      { $set: { images: data.images, image: data.images[0], deckType: data.deckType } }
     );
 
     return NextResponse.json(

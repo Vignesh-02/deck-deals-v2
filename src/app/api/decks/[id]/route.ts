@@ -71,6 +71,7 @@ export async function PUT(
       name: data.name,
       mobile: data.mobile,
       email: data.email,
+      deckType: data.deckType,
       address: data.address,
       price: String(data.price),
       images: data.images,

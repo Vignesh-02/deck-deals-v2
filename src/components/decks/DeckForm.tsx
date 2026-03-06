@@ -9,10 +9,12 @@ import ImageUpload from "@/components/ui/ImageUpload";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { IDeck } from "@/types";
+import { DECK_TYPES } from "@/lib/deck-types";
 
 interface DeckFormProps {
   deck?: IDeck;
   mode: "create" | "edit";
+  currentUserEmail?: string;
 }
 
 function getDeckImages(deck?: IDeck): string[] {
@@ -23,7 +25,7 @@ function getDeckImages(deck?: IDeck): string[] {
   return [];
 }
 
-export default function DeckForm({ deck, mode }: DeckFormProps) {
+export default function DeckForm({ deck, mode, currentUserEmail }: DeckFormProps) {
   const router = useRouter();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,8 @@ export default function DeckForm({ deck, mode }: DeckFormProps) {
   const [form, setForm] = useState({
     name: deck?.name || "",
     mobile: deck?.mobile || "",
-    email: deck?.email || "",
+    email: deck?.email || currentUserEmail || "",
+    deckType: deck?.deckType || DECK_TYPES[0],
     address: deck?.address || "",
     price: deck?.price || "",
     stock: deck?.stock || "",
@@ -42,7 +45,9 @@ export default function DeckForm({ deck, mode }: DeckFormProps) {
 
   const [images, setImages] = useState<string[]>(getDeckImages(deck));
 
-  function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function onChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -144,6 +149,25 @@ export default function DeckForm({ deck, mode }: DeckFormProps) {
         placeholder="Shipping address"
         required
       />
+
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium tracking-wide uppercase text-cream-muted">
+          Deck type
+        </label>
+        <select
+          name="deckType"
+          value={form.deckType}
+          onChange={onChange}
+          className="w-full rounded-lg border border-[#2a2a2a] bg-surface-dark px-4 py-3 text-cream focus:border-brand-gold/60 focus:ring-1 focus:ring-brand-gold/30 outline-none transition-colors"
+          required
+        >
+          {DECK_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Input

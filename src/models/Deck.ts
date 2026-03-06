@@ -1,9 +1,11 @@
 import mongoose, { Schema, Model } from "mongoose";
+import { DeckType } from "@/lib/deck-types";
 
 export interface IDeckDocument extends mongoose.Document {
   name: string;
   mobile: string;
   email: string;
+  deckType: DeckType;
   address: string;
   price: string;
   images: string[];
@@ -21,6 +23,7 @@ const DeckSchema = new Schema<IDeckDocument>({
   name: String,
   mobile: String,
   email: String,
+  deckType: { type: String, default: "Bicycle" },
   address: String,
   price: String,
   images: [String],
@@ -40,7 +43,7 @@ DeckSchema.index({ name: 1 });
 // Use the same collection name "decks" as the original app.
 // In dev hot-reload, an old cached model can miss `images` and silently strip it.
 const cachedDeckModel = mongoose.models.decks as Model<IDeckDocument> | undefined;
-if (cachedDeckModel && !cachedDeckModel.schema.path("images")) {
+if (cachedDeckModel && (!cachedDeckModel.schema.path("images") || !cachedDeckModel.schema.path("deckType"))) {
   delete mongoose.models.decks;
 }
 

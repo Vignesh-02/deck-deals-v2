@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DECK_TYPES } from "@/lib/deck-types";
 
 const imageUrlSchema = z.string().refine((value) => {
   const url = value.trim();
@@ -33,6 +34,7 @@ export const deckSchema = z.object({
   name: z.string().min(1, "Deck name is required."),
   mobile: z.string().min(1, "Contact number is required."),
   email: z.string().email("Please enter a valid email."),
+  deckType: z.enum(DECK_TYPES, { message: "Please select a deck type." }),
   address: z.string().min(1, "Address is required."),
   price: z.coerce.number().min(0, "Price must be a positive number."),
   images: z.array(imageUrlSchema).min(1, "At least one image is required."),

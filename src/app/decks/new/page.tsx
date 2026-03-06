@@ -20,7 +20,7 @@ export default async function NewDeckPage() {
           Fill in the details to list your deck for sale.
         </p>
         <div className="rounded-2xl border border-[#2a2a2a] bg-surface p-6 sm:p-8">
-          <DeckForm mode="create" />
+          <DeckForm mode="create" currentUserEmail={session.user?.email || ""} />
         </div>
       </div>
     </div>
