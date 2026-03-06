@@ -7,6 +7,7 @@ import { useState } from "react";
 export default function Navbar() {
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const userRole = (session?.user as any)?.role as "seller" | "customer" | undefined;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#2a2a2a]/60 bg-surface-darker/90 backdrop-blur-xl">
@@ -48,11 +49,19 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {userRole === "seller" && (
+                  <Link
+                    href="/decks/new"
+                    className="text-sm font-medium tracking-[0.1em] uppercase text-cream-muted hover:text-brand-gold transition-colors"
+                  >
+                    Sell
+                  </Link>
+                )}
                 <Link
-                  href="/decks/new"
+                  href="/account"
                   className="text-sm font-medium tracking-[0.1em] uppercase text-cream-muted hover:text-brand-gold transition-colors"
                 >
-                  Sell
+                  Account
                 </Link>
                 <span className="flex items-center gap-2.5 rounded-lg border border-[#2a2a2a] bg-surface px-3 py-1.5">
                   <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-gold/20 text-brand-gold text-xs font-bold uppercase">
@@ -121,12 +130,21 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {userRole === "seller" && (
+                  <Link
+                    href="/decks/new"
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-sm font-medium tracking-[0.1em] uppercase text-cream-muted hover:text-brand-gold transition-colors py-2"
+                  >
+                    Sell a deck
+                  </Link>
+                )}
                 <Link
-                  href="/decks/new"
+                  href="/account"
                   onClick={() => setMobileOpen(false)}
                   className="block text-sm font-medium tracking-[0.1em] uppercase text-cream-muted hover:text-brand-gold transition-colors py-2"
                 >
-                  Sell a deck
+                  Account
                 </Link>
                 <button
                   onClick={() => {

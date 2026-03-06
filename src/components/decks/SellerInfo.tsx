@@ -15,7 +15,7 @@ export default function SellerInfo({ deck }: { deck: IDeck }) {
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-green-500" />
           <span className="text-xs text-cream-faint tracking-wide">
-            Ready to ship worldwide
+            Ready to ship to your doorstep
           </span>
         </div>
       </div>

@@ -3,6 +3,9 @@ import { Types } from "mongoose";
 export interface IUser {
   _id: string;
   username: string;
+  email: string;
+  role: "seller" | "customer";
+  emailVerified: boolean;
   hash?: string;
   salt?: string;
   passwordHash?: string;

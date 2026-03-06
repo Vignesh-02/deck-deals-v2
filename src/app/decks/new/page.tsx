@@ -8,6 +8,7 @@ export const metadata = { title: "Sell a Deck — Deck Deals" };
 export default async function NewDeckPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
+  if ((session.user as any).role !== "seller") redirect("/decks");
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">

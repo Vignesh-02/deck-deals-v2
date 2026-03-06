@@ -15,11 +15,18 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.username || !credentials?.password) return null;
 
         await dbConnect();
-        const user = await User.findOne({ username: credentials.username });
+        const identifier = credentials.username.trim();
+        const user = await User.findOne({
+          $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
+        });
         if (!user) return null;
 
         const isValid = await (user as any).verifyPassword(credentials.password);
         if (!isValid) return null;
+
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email before logging in.");
+        }
 
         // Migrate legacy pbkdf2 hash to bcrypt
         await (user as any).migratePassword(credentials.password);
@@ -27,6 +34,8 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user._id.toString(),
           name: user.username,
+          email: user.email,
+          role: user.role,
         };
       },
     }),
@@ -36,12 +45,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as any).role;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
+        session.user.email = (token.email as string) || session.user.email;
       }
       return session;
     },

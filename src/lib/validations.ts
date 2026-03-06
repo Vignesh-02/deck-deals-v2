@@ -9,7 +9,9 @@ const imageUrlSchema = z.string().refine((value) => {
 
 export const registerSchema = z.object({
   username: z.string().min(5, "Username must be at least 5 characters long."),
+  email: z.string().email("Please enter a valid email."),
   password: z.string().min(8, "Password must be at least 8 characters long."),
+  role: z.enum(["seller", "customer"], { message: "Please choose a role." }),
 });
 
 export const loginSchema = z.object({

@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db";
 import User from "@/models/User";
 import { registerSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
+import { issueEmailVerification } from "@/lib/email-verification";
 
 export async function POST(req: Request) {
   try {
@@ -18,11 +19,16 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    const { username, password } = result.data;
-    const user = await (User as any).registerUser(username, password);
+    const { username, email, password, role } = result.data;
+    const user = await (User as any).registerUser(username, email, password, role);
+    await issueEmailVerification(user);
 
     return NextResponse.json(
-      { message: "Registration successful", userId: user._id.toString() },
+      {
+        message:
+          "Registration successful. Please verify your email before logging in.",
+        userId: user._id.toString(),
+      },
       { status: 201 }
     );
   } catch (err: any) {

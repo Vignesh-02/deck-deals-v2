@@ -10,11 +10,11 @@ export default function Footer() {
             </span>
           </div>
           <p className="text-xs text-cream-faint tracking-wide">
-            &copy; {new Date().getFullYear()} Deck Deals. Powered by magic &amp; caffeine.
+            &copy; {new Date().getFullYear()} Deck Deals. Powered by magic &amp; filter coffee.
           </p>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs text-cream-faint">All systems operational</span>
+            {/* <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" /> */}
+            {/* <span className="text-xs text-cream-faint">All systems operational</span> */}
           </div>
         </div>
       </div>

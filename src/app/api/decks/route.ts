@@ -30,6 +30,9 @@ export async function POST(req: Request) {
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if ((session.user as any).role !== "seller") {
+      return NextResponse.json({ error: "Only sellers can create decks." }, { status: 403 });
+    }
 
     const body = await req.json();
     const normalizedBody = {

@@ -2,8 +2,15 @@ import mongoose, { Schema, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+export type UserRole = "seller" | "customer";
+
 export interface IUserDocument extends mongoose.Document {
   username: string;
+  email: string;
+  role: UserRole;
+  emailVerified: boolean;
+  emailVerificationTokenHash?: string;
+  emailVerificationExpiresAt?: Date;
   passwordHash?: string;
   hash?: string;
   salt?: string;
@@ -11,6 +18,11 @@ export interface IUserDocument extends mongoose.Document {
 
 const UserSchema = new Schema<IUserDocument>({
   username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  role: { type: String, enum: ["seller", "customer"], required: true, default: "customer" },
+  emailVerified: { type: Boolean, default: false },
+  emailVerificationTokenHash: String,
+  emailVerificationExpiresAt: Date,
   passwordHash: String,
   // Legacy fields from passport-local-mongoose (pbkdf2)
   hash: String,
@@ -46,13 +58,23 @@ UserSchema.methods.migratePassword = async function (password: string): Promise<
 };
 
 // Static: register a new user
-UserSchema.statics.registerUser = async function (username: string, password: string) {
+UserSchema.statics.registerUser = async function (
+  username: string,
+  email: string,
+  password: string,
+  role: UserRole
+) {
+  const normalizedEmail = email.trim().toLowerCase();
   const existing = await this.findOne({ username });
   if (existing) {
     throw new Error("A user with the given username is already registered");
   }
+  const existingEmail = await this.findOne({ email: normalizedEmail });
+  if (existingEmail) {
+    throw new Error("A user with the given email is already registered");
+  }
   const passwordHash = await bcrypt.hash(password, 12);
-  return this.create({ username, passwordHash });
+  return this.create({ username, email: normalizedEmail, role, passwordHash });
 };
 
 const User: Model<IUserDocument> =

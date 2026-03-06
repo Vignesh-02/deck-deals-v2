@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 
+type UserRole = "seller" | "customer";
+
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const { addToast } = useToast();
@@ -20,12 +24,13 @@ export default function RegisterForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, email, password, role }),
       });
 
       const data = await res.json();
@@ -36,21 +41,9 @@ export default function RegisterForm() {
         return;
       }
 
-      // Auto-login after registration
-      const result = await signIn("credentials", {
-        username,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Registered but could not sign in. Please log in manually.");
-        setLoading(false);
-      } else {
-        addToast(`Welcome to Deck Deals, ${username}!`, "success");
-        router.push("/decks");
-        router.refresh();
-      }
+      setSuccess("Account created. Check your email and verify your account to log in.");
+      addToast("Verification email sent. Please verify your account.", "success");
+      setLoading(false);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -64,6 +57,46 @@ export default function RegisterForm() {
           {error}
         </div>
       )}
+      {success && (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-300">
+          {success}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium tracking-wide uppercase text-cream-muted">
+          I am joining as
+        </label>
+        <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#2a2a2a] bg-surface-darker p-2">
+          <button
+            type="button"
+            onClick={() => setRole("customer")}
+            className={`rounded-lg px-3 py-3 text-sm font-semibold tracking-wide uppercase transition-all ${
+              role === "customer"
+                ? "bg-brand-gold text-surface-darker shadow-lg shadow-brand-gold/30"
+                : "bg-transparent text-cream-muted hover:text-cream hover:bg-[#1f1f1f]"
+            }`}
+          >
+            Customer
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole("seller")}
+            className={`rounded-lg px-3 py-3 text-sm font-semibold tracking-wide uppercase transition-all ${
+              role === "seller"
+                ? "bg-brand-gold text-surface-darker shadow-lg shadow-brand-gold/30"
+                : "bg-transparent text-cream-muted hover:text-cream hover:bg-[#1f1f1f]"
+            }`}
+          >
+            Seller
+          </button>
+        </div>
+        <p className="text-xs text-cream-faint">
+          {role === "seller"
+            ? "You can list decks and manage inventory."
+            : "You can browse, buy, and review decks."}
+        </p>
+      </div>
       <Input
         label="Username"
         type="text"
@@ -71,6 +104,14 @@ export default function RegisterForm() {
         onChange={(e) => setUsername(e.target.value)}
         placeholder="Choose a username"
         minLength={5}
+        required
+      />
+      <Input
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
         required
       />
       <div>
@@ -94,6 +135,18 @@ export default function RegisterForm() {
           Log in
         </Link>
       </p>
+      {success && (
+        <button
+          type="button"
+          onClick={() => {
+            router.push("/login");
+            router.refresh();
+          }}
+          className="w-full text-sm text-brand-gold hover:text-brand-gold-light transition-colors"
+        >
+          Go to login
+        </button>
+      )}
     </form>
   );
 }
